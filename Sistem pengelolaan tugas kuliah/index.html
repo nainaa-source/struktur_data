@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow Campus - Pengelolaan Tugas Kuliah</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary: #0ea5e9;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px 30px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 850px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card);
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.15rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--muted);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        .btn-secondary { background: var(--secondary); color: white; }
+        .btn-secondary:hover { opacity: 0.9; }
+
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--bg); }
+
+        .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .toolbar input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: var(--bg);
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-high { background: #fee2e2; color: #b91c1c; }
+        .badge-med { background: #fef3c7; color: #b45309; }
+        .badge-low { background: #dcfce7; color: #15803d; }
+
+        .queue-box {
+            background: #eff6ff;
+            border-left: 4px solid var(--secondary);
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .queue-box h3 {
+            font-size: 0.95rem;
+            color: #0369a1;
+            margin-bottom: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📚 TaskFlow Campus</h1>
+        <p>Sistem Pengelolaan Tugas Kuliah — Implementasi Array, Queue, Stack, Searching & Sorting</p>
+    </header>
+
+    <div class="grid-layout">
+        <!-- KOLOM KIRI: Form & Antrean -->
+        <div>
+            <div class="card">
+                <h2 id="form-title">➕ Tambah Tugas Baru</h2>
+                <form id="task-form">
+                    <input type="hidden" id="edit-index" value="-1">
+                    <div class="form-group">
+                        <label>Mata Kuliah</label>
+                        <input type="text" id="matkul" placeholder="Contoh: Struktur Data" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Judul Tugas</label>
+                        <input type="text" id="judul" placeholder="Contoh: Membuat Aplikasi Web" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tenggat Waktu (Deadline)</label>
+                        <input type="date" id="deadline" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tingkat Prioritas</label>
+                        <select id="prioritas">
+                            <option value="Tinggi">Tinggi</option>
+                            <option value="Sedang" selected>Sedang</option>
+                            <option value="Rendah">Rendah</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">Simpan ke Array & Antrean</button>
+                    <button type="button" class="btn btn-outline" id="cancel-edit" style="width:100%; margin-top:8px; display:none;" onclick="batalEdit()">Batal Ubah</button>
+                </form>
+            </div>
+
+            <!-- IMPLEMENTASI QUEUE (FIFO) -->
+            <div class="card">
+                <h2>⏳ Antrean Pengerjaan (Queue - FIFO)</h2>
+                <div class="queue-box">
+                    <h3>Tugas Berikutnya yang Harus Dikerjakan:</h3>
+                    <p id="next-queue-info" style="font-weight: 600; font-size: 0.95rem;">Belum ada antrean tugas.</p>
+                </div>
+                <button class="btn btn-success" style="width: 100%;" onclick="selesaikanAntrean()">
+                    ✅ Selesaikan Tugas Terdepan (Dequeue)
+                </button>
+                <p style="font-size: 0.78rem; color: var(--muted); margin-top: 8px;">
+                    *Menggunakan prinsip <b>First-In First-Out</b>: Tugas yang paling awal masuk akan diproses lebih dulu.
+                </p>
+            </div>
+        </div>
+
+        <!-- KOLOM KANAN: Daftar Tugas, Searching, Sorting, Stack Undo -->
+        <div>
+            <div class="card">
+                <h2>📋 Daftar Tugas Kuliah (Array of Objects)</h2>
+                
+                <!-- Toolbar Searching, Sorting & Undo Stack -->
+                <div class="toolbar">
+                    <input type="text" id="search-input" placeholder="🔍 Cari mata kuliah atau judul (Linear Search)..." onkeyup="cariTugas()">
+                    <button class="btn btn-secondary btn-sm" onclick="urutkanDeadline()">📅 Urutkan Deadline (Bubble Sort)</button>
+                    <button class="btn btn-warning btn-sm" id="undo-btn" onclick="undoHapus()" disabled>↩️ Undo Hapus (Stack: 0)</button>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Mata Kuliah</th>
+                                <th>Judul Tugas</th>
+                                <th>Deadline</th>
+                                <th>Prioritas</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="task-table-body">
+                            <!-- Data dirender via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // =========================================================================
+    // 1. INISIALISASI STRUKTUR DATA
+    // =========================================================================
+    let daftarTugas = [];      // ARRAY: Menyimpan seluruh objek data tugas utama
+    let antreanTugas = [];     // QUEUE: Menyimpan urutan tugas masuk (FIFO)
+    let riwayatHapus = [];     // STACK: Menyimpan tugas yang dihapus untuk Undo (LIFO)
+
+    // Data awal (Dummy Data) agar tabel tidak kosong saat pertama dibuka
+    function inisialisasiDataAwal() {
+        const dataAwal = [
+            { id: 101, matkul: "Struktur Data", judul: "Project Aplikasi Web", deadline: "2026-11-25", prioritas: "Tinggi" },
+            { id: 102, matkul: "Basis Data", judul: "Normalisasi Tabel 3NF", deadline: "2026-11-20", prioritas: "Sedang" },
+            { id: 103, matkul: "Jaringan Komputer", judul: "Simulasi Cisco Packet Tracer", deadline: "2026-11-22", prioritas: "Tinggi" }
+        ];
+
+        for (let i = 0; i < dataAwal.length; i++) {
+            daftarTugas.push(dataAwal[i]);
+            antreanTugas.push(dataAwal[i]); // Enqueue
+        }
+        renderTabel(daftarTugas);
+        updateInfoQueue();
+    }
+
+    // =========================================================================
+    // 2. TAMBAH DATA (INSERT KE ARRAY & ENQUEUE KE QUEUE) & UBAH DATA
+    // =========================================================================
+    document.getElementById("task-form").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const matkul = document.getElementById("matkul").value.trim();
+        const judul = document.getElementById("judul").value.trim();
+        const deadline = document.getElementById("deadline").value;
+        const prioritas = document.getElementById("prioritas").value;
+        const editIndex = parseInt(document.getElementById("edit-index").value);
+
+        if (editIndex === -1) {
+            // Mode Tambah Data Baru
+            const tugasBaru = {
+                id: Date.now(),
+                matkul: matkul,
+                judul: judul,
+                deadline: deadline,
+                prioritas: prioritas
+            };
+
+            daftarTugas.push(tugasBaru);   // Tambah ke Array Utama
+            antreanTugas.push(tugasBaru);  // Enqueue ke Antrean
+        } else {
+            // Mode Ubah Data pada Indeks Array tertentu
+            const idLama = daftarTugas[editIndex].id;
+            daftarTugas[editIndex] = { id: idLama, matkul, judul, deadline, prioritas };
+
+            // Perbarui juga data yang sama di dalam Queue jika masih ada
+            for (let i = 0; i < antreanTugas.length; i++) {
+                if (antreanTugas[i].id === idLama) {
+                    antreanTugas[i] = daftarTugas[editIndex];
+                    break;
+                }
+            }
+            batalEdit();
+        }
+
+        document.getElementById("task-form").reset();
+        renderTabel(daftarTugas);
+        updateInfoQueue();
+    });
+
+    // =========================================================================
+    // 3. UBAH DATA (PERSIAPAN FORM EDIT)
+    // =========================================================================
+    function siapkanEdit(index) {
+        const tugas = daftarTugas[index];
+        document.getElementById("matkul").value = tugas.matkul;
+        document.getElementById("judul").value = tugas.judul;
+        document.getElementById("deadline").value = tugas.deadline;
+        document.getElementById("prioritas").value = tugas.prioritas;
+        document.getElementById("edit-index").value = index;
+
+        document.getElementById("form-title").innerText = "✏️ Ubah Data Tugas";
+        document.getElementById("submit-btn").innerText = "Simpan Perubahan";
+        document.getElementById("cancel-edit").style.display = "inline-flex";
+    }
+
+    function batalEdit() {
+        document.getElementById("edit-index").value = "-1";
+        document.getElementById("task-form").reset();
+        document.getElementById("form-title").innerText = "➕ Tambah Tugas Baru";
+        document.getElementById("submit-btn").innerText = "Simpan ke Array & Antrean";
+        document.getElementById("cancel-edit").style.display = "none";
+    }
+
+    // =========================================================================
+    // 4. HAPUS DATA & IMPLEMENTASI STACK (PUSH & POP UNTUK UNDO)
+    // =========================================================================
+    function hapusTugas(index) {
+        const tugasDihapus = daftarTugas[index];
+
+        // PUSH ke dalam Stack riwayatHapus
+        riwayatHapus.push(tugasDihapus);
+
+        // Hapus elemen dari Array utama dengan menggeser elemen (manual splice)
+        daftarTugas.splice(index, 1);
+
+        // Hapus juga dari Queue jika belum dikerjakan
+        antreanTugas = antreanTugas.filter(item => item.id !== tugasDihapus.id);
+
+        updateTombolUndo();
+        renderTabel(daftarTugas);
+        updateInfoQueue();
+    }
+
+    function undoHapus() {
+        if (riwayatHapus.length === 0) return;
+
+        // POP elemen paling atas (terakhir dihapus) dari Stack
+        const tugasDipulihkan = riwayatHapus.pop();
+
+        // Kembalikan ke Array utama & Queue
+        daftarTugas.push(tugasDipulihkan);
+        antreanTugas.push(tugasDipulihkan);
+
+        updateTombolUndo();
+        renderTabel(daftarTugas);
+        updateInfoQueue();
+    }
+
+    function updateTombolUndo() {
+        const btn = document.getElementById("undo-btn");
+        btn.innerText = `↩️ Undo Hapus (Stack: ${riwayatHapus.length})`;
+        btn.disabled = riwayatHapus.length === 0;
+    }
+
+    // =========================================================================
+    // 5. IMPLEMENTASI QUEUE (DEQUEUE - FIRST IN FIRST OUT)
+    // =========================================================================
+    function selesaikanAntrean() {
+        if (antreanTugas.length === 0) {
+            alert("Tidak ada tugas dalam antrean!");
+            return;
+        }
+
+        // DEQUEUE: Mengambil elemen paling depan (indeks ke-0)
+        const tugasSelesai = antreanTugas.shift();
+
+        // Hapus tugas yang sudah selesai dari daftarTugas utama
+        daftarTugas = daftarTugas.filter(item => item.id !== tugasSelesai.id);
+
+        alert(`Tugas "${tugasSelesai.judul}" (${tugasSelesai.matkul}) telah selesai dikerjakan!`);
+        renderTabel(daftarTugas);
+        updateInfoQueue();
+    }
+
+    function updateInfoQueue() {
+        const info = document.getElementById("next-queue-info");
+        if (antreanTugas.length > 0) {
+            const depan = antreanTugas[0];
+            info.innerHTML = `${depan.matkul} — "${depan.judul}" <br><span style="font-size:0.8rem; color:#64748b;">Deadline: ${depan.deadline} | Total Antrean: ${antreanTugas.length}</span>`;
+        } else {
+            info.innerText = "Semua antrean tugas telah selesai!";
+        }
+    }
+
+    // =========================================================================
+    // 6. ALGORITMA SEARCHING (LINEAR SEARCH)
+    // =========================================================================
+    function cariTugas() {
+        const keyword = document.getElementById("search-input").value.toLowerCase();
+        let hasilPencarian = [];
+
+        // Linear Search: Memeriksa elemen array satu per satu dari indeks 0 hingga akhir
+        for (let i = 0; i < daftarTugas.length; i++) {
+            const cocokMatkul = daftarTugas[i].matkul.toLowerCase().includes(keyword);
+            const cocokJudul = daftarTugas[i].judul.toLowerCase().includes(keyword);
+
+            if (cocokMatkul || cocokJudul) {
+                hasilPencarian.push(daftarTugas[i]);
+            }
+        }
+
+        renderTabel(hasilPencarian);
+    }
+
+    // =========================================================================
+    // 7. ALGORITMA SORTING (BUBBLE SORT BERDASARKAN DEADLINE TERDEKAT)
+    // =========================================================================
+    function urutkanDeadline() {
+        let n = daftarTugas.length;
+
+        // Bubble Sort: Membandingkan dua elemen bersebelahan dan menukarnya jika salah urutan
+        for (let i = 0; i < n - 1; i++) {
+            for (let j = 0; j < n - i - 1; j++) {
+                if (daftarTugas[j].deadline > daftarTugas[j + 1].deadline) {
+                    // Proses Swap (Pertukaran posisi)
+                    let temp = daftarTugas[j];
+                    daftarTugas[j] = daftarTugas[j + 1];
+                    daftarTugas[j + 1] = temp;
+                }
+            }
+        }
+
+        renderTabel(daftarTugas);
+    }
+
+    // =========================================================================
+    // 8. RENDER DATA KE TABEL HTML
+    // =========================================================================
+    function renderTabel(dataArray) {
+        const tbody = document.getElementById("task-table-body");
+        tbody.innerHTML = "";
+
+        if (dataArray.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Tidak ada data tugas yang ditemukan.</td></tr>`;
+            return;
+        }
+
+        for (let i = 0; i < dataArray.length; i++) {
+            const item = dataArray[i];
+            let badgeClass = "badge-med";
+            if (item.prioritas === "Tinggi") badgeClass = "badge-high";
+            if (item.prioritas === "Rendah") badgeClass = "badge-low";
+
+            // Cari indeks asli di daftarTugas agar edit/hapus tetap akurat saat mode pencarian aktif
+            const indeksAsli = daftarTugas.findIndex(t => t.id === item.id);
+
+            const row = `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${item.matkul}</strong></td>
+                    <td>${item.judul}</td>
+                    <td>${item.deadline}</td>
+                    <td><span class="badge ${badgeClass}">${item.prioritas}</span></td>
+                    <td class="action-btns">
+                        <button class="btn btn-warning btn-sm" onclick="siapkanEdit(${indeksAsli})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="hapusTugas(${indeksAsli})">Hapus</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        }
+    }
+
+    // Jalankan aplikasi pertama kali
+    inisialisasiDataAwal();
+</script>
+
+</body>
+</html>
